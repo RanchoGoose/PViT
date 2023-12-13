@@ -1,28 +1,16 @@
 import numpy as np
-import sys
 import os
 import matplotlib.pyplot as plt
-import pickle
 import argparse
-import time
 import random
-import seaborn as sns
 from scipy.ndimage import gaussian_filter
-from matplotlib.colors import Normalize
 import matplotlib.ticker as ticker
 import torch
 import torch.nn as nn
-import torch.optim as optim
-from torchvision import datasets, transforms
 from torch.utils.data import DataLoader
-from torchvision.models import resnet18
-import torch.distributed as dist
-from skimage.filters import gaussian as gblur
-from PIL import Image as PILImage
-from utils import get_transformer_config, get_transformer_model, get_openai_lr, load_prior_model, get_cosine_schedule_with_warmup, DualResolutionTransform, DualResolutionDataset, get_batch_size, save_checkpoint, load_checkpoint, get_linear_schedule_with_warmup, load_model
-from priors.priors import Prior_Dataloader
+from utils import get_transformer_config, get_transformer_model, load_prior_model, get_batch_size, load_model
 from torchvision.transforms.functional import to_pil_image
-from dataloader import build_dataset, idx_to_label, get_test_near_ood_loader, get_test_far_ood_loader
+from dataloader import build_dataset, idx_to_label
 
 parser = argparse.ArgumentParser(description='Evaluates a CIFAR OOD Detector',
                                  formatter_class=argparse.ArgumentDefaultsHelpFormatter)

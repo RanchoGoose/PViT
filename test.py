@@ -1,28 +1,16 @@
 import numpy as np
-import sys
-import os
-
-import pickle
 import argparse
-import time
-
 import torch
 import torch.nn as nn
-import torch.optim as optim
 from torchvision import datasets
 from torch.utils.data import DataLoader
 import torch.nn.functional as F
 import torchvision.transforms as trn
-
-from skimage.filters import gaussian as gblur
 from PIL import Image as PILImage
-from utils import get_transformer_config, get_transformer_model, get_openai_lr, load_prior_model, get_cosine_schedule_with_warmup, DualResolutionTransform, DualResolutionDataset, get_batch_size, load_model, TestTransform, get_transformer_model_temp, save_scores_to_csv
-# from visualization import plot_histogram, plot_cpvr
-from priors.priors import Prior_Dataloader
+from utils import get_transformer_config, get_transformer_model, load_prior_model, DualResolutionTransform, DualResolutionDataset, get_batch_size, load_model, TestTransform, save_scores_to_csv
 import ood_utils.score_calculation as lib
 from ood_utils.display_results import show_performance, get_measures, print_measures, print_measures_with_std
 import ood_utils.svhn_loader as svhn
-import ood_utils.lsun_loader as lsun_loader
 from dataloader import build_dataset, get_test_near_ood_loader, get_test_far_ood_loader
     
 parser = argparse.ArgumentParser(description='Evaluates a CIFAR OOD Detector',
