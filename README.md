@@ -37,12 +37,15 @@ Download `resnet50-supcon.pt` from the [link](https://www.dropbox.com/scl/fi/f3b
 
 Other prior models will be automatically downloaded from Huggingface or Pytorch.
 
-# Train PViT
+### Train PViT
 
-For instructions on training the PViT model, please refer to the `README.md` in the folder `./train`
+To train To train PViT on IMAGENET-1k, please run
 
+```
+python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inaturalist --ood_detectors pvit --pvit --batch_size 256 --num_workers 1 --prior_model vit-b-16 --score cross_entropy --seed 0 --train
+```
 
-To train the PViT model with different prior models, modify the `--prior_model_name` argument. The available options are:
+To train the PViT model with different prior models, modify the `--prior_model` argument. The available options are:
 
 - `vit_imagenet` for Google ViT
 - `vit-b-16` for DeiT
@@ -51,7 +54,12 @@ To train the PViT model with different prior models, modify the `--prior_model_n
 - `regnet-y-16gf-swag-e2e-v1` for RegNet
 - `vit-b16-swag-e2e-v1` for ViT-Swag
 
-# Evaluate PViT
+To train PViT on CIFAR100, please run
+```
+python main.py --model_name pvit --id_data_name cifar100 --ood_data_name cifar10 --ood_detectors pvit --pvit --batch_size 512 --num_workers 1 --prior_model vit_cifar100 --score cross_entropy --seed 0 --train
+```
+
+### Evaluate PViT
 
 To run experiments, run
 ```
@@ -65,7 +73,7 @@ modify the `--score` argument. The available options are:
 
 modify the `--prior_model` argument to evaluate with different prior models.
 
-# Reproduce the results in the paper
+### Reproduce the results in the paper
 To simply reproduce the results presented in the paper:
 1. Download the [saved model outputs](https://drive.google.com/file/d/170lh8DJLK3uPScxDbvwqbmOriHODM5gT/view?usp=sharing) . If you do this, you do not need to download the dataset. 
 2. Place the unzipped folder in the root directory.
