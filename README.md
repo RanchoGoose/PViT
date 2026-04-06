@@ -1,80 +1,100 @@
-# PViT: Prior-augmented Vision Transformer for Out-of-distribution Detection
+# PViT: Prior-Augmented Vision Transformer for Out-of-Distribution Detection
 
-This repository contains the source code for the paper titled [PViT: Prior-augmented Vision Transformer for Out-of-distribution Detection](https://arxiv.org/abs/2410.20631). 
+Official implementation of [PViT: Prior-Augmented Vision Transformer for Out-of-Distribution Detection](https://arxiv.org/abs/2410.20631).
 
-Note: We apologize for any inconvenience caused by the current state of the code. Due to ongoing improvements, the training and testing scripts are located in separate folders. We are working on consolidating the code into a single repository, which will be released upon the acceptance of the paper.
+## Overview
 
-### Setup
-Install the `./requirements.txt`.
+PViT is a novel framework that enhances Vision Transformer robustness for image Out-of-Distribution (OOD) detection. It trains a ViT to predict class labels using both image tokens and prior class logits from a pretrained model, then identifies OOD samples by measuring the divergence between predicted and prior logits. PViT achieves state-of-the-art performance without requiring additional data modeling, generation methods, or structural modifications.
 
-Then install the required packages by
+## Setup
+
+### Requirements
+```bash
+pip install -r requirements.txt
 ```
-chmod +x install_packages.sh
-./install_packages.sh
+
+### Prepare Datasets
+
+#### 1. ImageNet-1K
+Download `ILSVRC2012_img_train.tar` and `ILSVRC2012_img_val.tar` from the official [ImageNet website](https://www.image-net.org/). Use the provided script to extract:
+```bash
+bash ./dataloaders/assets/extract_ILSVRC.sh
 ```
+For dataset folder structure details, see `./dataloaders/README.md`.
 
-### Prepare Dataset
-To set up the dataset folder structures, please refer to the `README.md` file located in the `./dataloaders` directory.
-
-#### 1. Download ImageNet-1k:
-Download `ILSVRC2012_img_train.tar` and `ILSVRC2012_img_val.tar` from the official ImageNet [website](). And use `./dataloaders/assets/extract_ILSVRC.sh` to unzip the zip files.
-
-#### 2. Download iNaturalist, SUN, Places, Textures, OpenImage-O OOD datasets:
-To download iNaturalist, SUN, and Places
-```
+#### 2. OOD Datasets
+Download iNaturalist, SUN, and Places:
+```bash
 wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/iNaturalist.tar.gz
 wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/SUN.tar.gz
 wget http://pages.cs.wisc.edu/~huangrui/imagenet_ood_dataset/Places.tar.gz
 ```
-Download Textures from the official [website](https://www.robots.ox.ac.uk/~vgg/data/dtd/).
-Download OpenImage-O from the official [website](https://github.com/haoqiwang/vim/tree/master/datalists).
+- **Textures**: Download from the [official website](https://www.robots.ox.ac.uk/~vgg/data/dtd/)
+- **OpenImage-O**: Download from [ViM repo](https://github.com/haoqiwang/vim/tree/master/datalists)
+- **Other datasets**: Refer to [OpenOOD](https://github.com/Jingkang50/OpenOOD/tree/main)
 
-#### 3. Additional Datasets
-For other datasets, please refer to the [OpenOOD](https://github.com/Jingkang50/OpenOOD/tree/main)
+#### 3. Pretrained Models
+Download `resnet50-supcon.pt` from [this link](https://www.dropbox.com/scl/fi/f3bfipk2o96f27vibpozb/resnet50-supcon.pt?rlkey=auxw68wcgqcx4ze6yhnmm395y&dl=0) and place it in `./pretrained_models/`. Other prior models are automatically downloaded from HuggingFace or PyTorch Hub.
 
-#### 4. Pretrained models
-Download `resnet50-supcon.pt` from the [link](https://www.dropbox.com/scl/fi/f3bfipk2o96f27vibpozb/resnet50-supcon.pt?rlkey=auxw68wcgqcx4ze6yhnmm395y&dl=0) and put it in the directory `pretrained_models` as `./pretrained_models/resnet50-supcon.py`.
+## Training
 
-Other prior models will be automatically downloaded from Huggingface or Pytorch.
-
-### Train PViT
-
-To train To train PViT on IMAGENET-1k, please run
-
-```
-python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inaturalist --ood_detectors pvit --pvit --batch_size 256 --num_workers 1 --prior_model vit-b-16 --score cross_entropy --seed 0 --train
+Train PViT on ImageNet-1K:
+```bash
+python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inaturalist \
+    --ood_detectors pvit --pvit --batch_size 256 --num_workers 1 \
+    --prior_model vit-b-16 --score cross_entropy --seed 0 --train
 ```
 
-To train the PViT model with different prior models, modify the `--prior_model` argument. The available options are:
-
-- `vit_imagenet` for Google ViT
-- `vit-b-16` for DeiT
-- `vit-lp` for ViT-LP
-- `resnet50-supcon` for ResNet50-SupCon
-- `regnet-y-16gf-swag-e2e-v1` for RegNet
-- `vit-b16-swag-e2e-v1` for ViT-Swag
-
-To train PViT on CIFAR100, please run
-```
-python main.py --model_name pvit --id_data_name cifar100 --ood_data_name cifar10 --ood_detectors pvit --pvit --batch_size 512 --num_workers 1 --prior_model vit_cifar100 --score cross_entropy --seed 0 --train
+Train PViT on CIFAR-100:
+```bash
+python main.py --model_name pvit --id_data_name cifar100 --ood_data_name cifar10 \
+    --ood_detectors pvit --pvit --batch_size 512 --num_workers 1 \
+    --prior_model vit_cifar100 --score cross_entropy --seed 0 --train
 ```
 
-### Evaluate PViT
+### Available Prior Models
+| Argument | Model |
+|----------|-------|
+| `vit_imagenet` | Google ViT |
+| `vit-b-16` | DeiT |
+| `vit-lp` | ViT-LP |
+| `resnet50-supcon` | ResNet50-SupCon |
+| `regnet-y-16gf-swag-e2e-v1` | RegNet |
+| `vit-b16-swag-e2e-v1` | ViT-SWAG |
 
-To run experiments, run
+## Evaluation
+
+```bash
+python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inaturalist \
+    --ood_detectors pvit --batch_size 512 --num_workers 1 \
+    --prior_model vit-lp --pvit --score cross_entropy
 ```
-python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inaturalist --ood_detectors pvit --batch_size 512 --num_workers 1 --prior_model vit-lp --pvit --score cross_entropy
+
+### OOD Scoring Functions
+| Argument | Method |
+|----------|--------|
+| `cross_entropy` | Cross-Entropy (CE) |
+| `KL` | KL Divergence |
+| `dis` | Euclidean Distance (ED) |
+
+## Reproduce Paper Results
+
+To reproduce the results without training:
+1. Download the [saved model outputs](https://drive.google.com/file/d/170lh8DJLK3uPScxDbvwqbmOriHODM5gT/view?usp=sharing)
+2. Place the unzipped folder in the root directory
+3. Run the evaluation command above with the desired configuration
+
+## Citation
+
+```bibtex
+@article{zhang2024pvit,
+  title={PViT: Prior-Augmented Vision Transformer for Out-of-Distribution Detection},
+  author={Zhang, Tianhao and Chen, Zhixiang and Mihaylova, Lyudmila S.},
+  journal={arXiv preprint arXiv:2410.20631},
+  year={2024}
+}
 ```
-modify the `--score` argument. The available options are:
 
-- `cross_entropy` for CE
-- `KL` for KL divergence
-- `dis` for ED
+## License
 
-modify the `--prior_model` argument to evaluate with different prior models.
-
-### Reproduce the results in the paper
-To simply reproduce the results presented in the paper:
-1. Download the [saved model outputs](https://drive.google.com/file/d/170lh8DJLK3uPScxDbvwqbmOriHODM5gT/view?usp=sharing) . If you do this, you do not need to download the dataset. 
-2. Place the unzipped folder in the root directory.
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
