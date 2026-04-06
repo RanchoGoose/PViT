@@ -20,3 +20,4 @@ class STEPOODDetector(OODDetector):
 
         return torch.tensor(scores).to(logits[0].device)
 
+

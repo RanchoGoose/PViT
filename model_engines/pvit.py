@@ -8,7 +8,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 import time
-        
+
 from model_engines.interface import ModelEngine
 from model_engines.assets import extract_features_pvit, extract_features_pvit_ablation
 from utils import get_transformer_config, get_transformer_model, load_model
@@ -28,12 +28,12 @@ class PViTModelEngine(ModelEngine):
             self._model = model
             if not args.train:
                 self._model = load_model(args, self._model)
-        
+
         if args.prior_model == "vit-b16-swag-e2e-v1":
             self._data_transform = ViT_B_16_Weights.IMAGENET1K_SWAG_E2E_V1.transforms()
         elif args.prior_model == "resnet18_cifar100":
             self._data_transform = DATA_TRANSFORM_32
-        else:           
+        else:
             self._data_transform = DATA_TRANSFORM
 
         self._react_percentile = 0.9
@@ -41,29 +41,29 @@ class PViTModelEngine(ModelEngine):
         self._model.to(self._device)
         self._model.eval()
         self.prior_model = prior_model
-    
+
     def get_data_transform(self):
         return self._data_transform
-    
+
     def set_dataloaders(self):
         self._dataloaders = {}
-        self._dataloaders['train'] = get_train_dataloader(self._data_root_path, 
+        self._dataloaders['train'] = get_train_dataloader(self._data_root_path,
                                                          self._train_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
 
-        self._dataloaders['id'] = get_id_dataloader(self._data_root_path, 
+        self._dataloaders['id'] = get_id_dataloader(self._data_root_path,
                                                          self._id_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
-        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path, 
+        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path,
                                                          self._ood_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
-    
+
 
     def train_model(self):
         # Set training parameters
@@ -256,16 +256,16 @@ class PViTModelEngine(ModelEngine):
         }
 
     def apply_react(self):
-        self._model = apply_react(self.prior_model, self._model, self._dataloaders['train'], self._device, 
+        self._model = apply_react(self.prior_model, self._model, self._dataloaders['train'], self._device,
                                   self._react_percentile)
-    
+
     def get_model_outputs(self):
         model_outputs = {}
         for fold in self._folds:
             model_outputs[fold] = {}
-            
+
             _dataloader = self._dataloaders[fold]
-            
+
             if self._args.run_ablation:
                 _tensor_dict = extract_features_pvit_ablation(self.prior_model, self._model, _dataloader, self._device)
             else:
@@ -275,17 +275,17 @@ class PViTModelEngine(ModelEngine):
             model_outputs[fold]["logits"] = _tensor_dict["logits"]
             model_outputs[fold]["labels"] = _tensor_dict["labels"]
             model_outputs[fold]["priors"] = _tensor_dict["priors"]
-        
+
         return model_outputs['train'], model_outputs['id'], model_outputs['ood']
 
 import numpy as np
 from tqdm import tqdm
 import os
 def apply_react(prior_model, model, dataloader_train, device, react_percentile=0.95):
-    
+
     model.eval()
     model = model.to(device)
-    
+
     feas = [[]] * len(dataloader_train)
     for i, labeled_data in tqdm(enumerate(dataloader_train), desc=f"{apply_react.__name__}"):
         _x = labeled_data[0].to(device)
@@ -318,7 +318,7 @@ DATA_TRANSFORM = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
         ])
 
@@ -337,20 +337,20 @@ class ViT_Imagenet(nn.Module):
 
         # Initialize the layer normalization using the model's configuration
         self.ln = nn.LayerNorm(self.encoder.config.hidden_size, eps=self.encoder.config.layer_norm_eps)
-        
+
         # Access the classifier head
         self.fc = self.encoder.classifier
 
         # Replace these with identity for feature extraction
         self.encoder.classifier = nn.Identity()
-        
+
     def forward(self, x):
         # Get the encoder outputs with hidden states
         outputs = self.encoder(x, output_hidden_states=True)
-        
+
         # Extract the last hidden state as features
         last_hidden_state = outputs.hidden_states[-1]  # Shape: [batch_size, seq_len, hidden_dim]
-        
+
         # Select the [CLS] token for classification
         cls_token_output = last_hidden_state[:, 0, :]  # Shape: [batch_size, hidden_dim]
 

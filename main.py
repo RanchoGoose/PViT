@@ -17,7 +17,7 @@ from utils import load_prior_model
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', '-m', type=str, 
+    parser.add_argument('--model_name', '-m', type=str,
                         default='pvit',
                         help = 'resnet50-supcon'
                             'resnet50-react'
@@ -26,7 +26,7 @@ def get_args():
                             'mobilenet-v2'
                             'resnet50'
                             "vit-b-16" "vit-lp" "swin-t")
-    parser.add_argument('--prior_model', type=str, 
+    parser.add_argument('--prior_model', type=str,
                         default='resnet50-supcon',
                         help = 'resnet50-supcon'
                             'resnet50-react'
@@ -37,48 +37,48 @@ def get_args():
                             "vit-b-16" "vit-lp" "swin-t")
     parser.add_argument('--pvit', action='store_true')
     parser.add_argument('--score', default='cross_entropy', type=str, help='score options: KL, cross_entropy, dis')
-    parser.add_argument('--seed', type=int, 
-                        default=0, 
+    parser.add_argument('--seed', type=int,
+                        default=0,
                         help='Seed number')
 
-    parser.add_argument('--gpu_idx', '-g', type=int, 
-                        default=0, 
+    parser.add_argument('--gpu_idx', '-g', type=int,
+                        default=0,
                         help='gpu idx')
-    parser.add_argument('--num_workers', '-nw', type=int, 
-                        default=8, 
+    parser.add_argument('--num_workers', '-nw', type=int,
+                        default=8,
                         help='number of workers')
-    parser.add_argument('--train_data_name', '-td', type=str,  
+    parser.add_argument('--train_data_name', '-td', type=str,
                         default='imagenet1k',
                         # default='cifar10',
                         choices=['imagenet1k', 'cifar10', 'cifar100'],
                         help='The data name for the in-distribution')
-    parser.add_argument('--id_data_name', '-id', type=str,  
+    parser.add_argument('--id_data_name', '-id', type=str,
                         default='imagenet1k',
                         # default='cifar10',
                         choices=['imagenet1k',
-                                 'imagenet1k-v2-a', 
-                                 'imagenet1k-v2-b', 
+                                 'imagenet1k-v2-a',
+                                 'imagenet1k-v2-b',
                                  'imagenet1k-v2-c',
                                  'cifar100',
                                  'cifar10'],
                         help='The data name for the in-distribution')
-    parser.add_argument('--ood_data_name', '-ood', type=str, 
-                        # default='inaturalist', 
-                        default='svhn', 
+    parser.add_argument('--ood_data_name', '-ood', type=str,
+                        # default='inaturalist',
+                        default='svhn',
                         help= 'inaturalist' 'sun' 'places' 'textures' 'openimage-o' 'ssb_hard' 'ninco'
                         )
-    
-    parser.add_argument("--ood_detectors", type=str, nargs='+', 
-                        # default=['energy', 'nnguide', 'msp', 'maxlogit', 'vim', 'ssd', 'mahalanobis', 'knn'], 
-                        default=['energy', 'nnguide'], 
+
+    parser.add_argument("--ood_detectors", type=str, nargs='+',
+                        # default=['energy', 'nnguide', 'msp', 'maxlogit', 'vim', 'ssd', 'mahalanobis', 'knn'],
+                        default=['energy', 'nnguide'],
                         help="List of OOD detectors")
 
-    parser.add_argument('--batch_size', '-bs', type=int, 
-                        default=32, 
+    parser.add_argument('--batch_size', '-bs', type=int,
+                        default=32,
                         help='Batch size for inference')
 
-    parser.add_argument('--data_root_path', type=str, 
-                        default='/mnt/parscratch/users/coq20tz/OpenOOD/scripts/download/data', 
+    parser.add_argument('--data_root_path', type=str,
+                        default='/mnt/parscratch/users/coq20tz/OpenOOD/scripts/download/data',
                         help='Data root path')
     parser.add_argument('--save_root_path', type=str,
                         default='./saved_model_outputs')
@@ -94,17 +94,17 @@ def get_args():
     args.device = torch.device('cuda:%d' % (args.gpu_idx) if torch.cuda.is_available() else 'cpu')
 
     args = import_yaml_config(args, f'./configs/model/{args.model_name}.yaml')
-    
+
     args.log_dir_path = f"./logs/seed-{args.seed}/{args.model_name}/{args.train_data_name}/{args.id_data_name}"
-    
+
     args.train_save_dir_path = f"{args.save_root_path}/seed-{args.seed}/{args.model_name}/{args.train_data_name}"
     args.id_save_dir_path = f"{args.save_root_path}/seed-{args.seed}/{args.model_name}/{args.id_data_name}"
     args.ood_save_dir_path = f"{args.save_root_path}/seed-{args.seed}/{args.model_name}/{args.ood_data_name}"
 
     args.detector_save_dir_path = f"{args.save_root_path}/seed-{args.seed}/{args.model_name}/{args.train_data_name}/detectors"
-    
+
     mkdir(args.log_dir_path)
-    
+
     mkdir(args.train_save_dir_path)
     mkdir(args.id_save_dir_path)
     mkdir(args.ood_save_dir_path)
@@ -132,7 +132,7 @@ def main():
     #     for pvit_score_name in args.score:
     #         args = import_yaml_config(args, f"./configs/detector/pvit.yaml")
     #         scores_set[pvit_score_name], labels, accs[pvit_score_name] = evaluate(args, 'pvit')
-    # else:       
+    # else:
     if args.pvit and args.train:
         train(args)
     else:
@@ -153,7 +153,7 @@ def train(args):
     model_engine.test_model()
 
 def evaluate(args, ood_detector_name: str):
-    
+
     '''
     Executing model engine
     '''
@@ -168,8 +168,8 @@ def evaluate(args, ood_detector_name: str):
     else:
         model_engine.set_model(args)
     model_engine.set_dataloaders()
-    
-    
+
+
     save_dir_paths = {}
     save_dir_paths['train'] = args.train_save_dir_path
     save_dir_paths['id'] = args.id_save_dir_path
@@ -177,15 +177,15 @@ def evaluate(args, ood_detector_name: str):
 
     model_outputs = {}
     labels = {}
-    
+
     outputs_exist = True
-    
+
     for fold in ['train', 'id', 'ood']:
         if args.pvit:
             model_output_path = f"{save_dir_paths[fold]}/model_outputs_{fold}_{args.prior_model}.pt"
-        else: 
+        else:
             model_output_path = f"{save_dir_paths[fold]}/model_outputs_{fold}.pt"
-        
+
         if not os.path.exists(model_output_path):
             outputs_exist = False
             break
@@ -239,7 +239,7 @@ def evaluate(args, ood_detector_name: str):
     except:
         ood_detector = create_ood_detector(ood_detector_name)
         ood_detector.setup(args, model_outputs['train'])
-        
+
         print(f"[{args.model_name} / {ood_detector_name}]: saving detector...")
         save_dict({"detector": ood_detector}, saved_detector_path)
         print(f"[{args.model_name} / {ood_detector_name}]: detector saved!")
@@ -254,18 +254,18 @@ def evaluate(args, ood_detector_name: str):
     else:
         id_scores = ood_detector.infer(model_outputs['id'])
         ood_scores = ood_detector.infer(model_outputs['ood'])
-    
+
     # Move tensors to CPU before converting to numpy
     id_scores = id_scores.cpu()
     ood_scores = ood_scores.cpu()
     scores = torch.cat([id_scores, ood_scores], dim=0).numpy()
-    
+
     id_logits = model_outputs['id']['logits'].cpu()
     labels_id = labels['id'].cpu()
     labels_ood = labels['ood'].cpu()
-    
+
     detection_labels = torch.cat([torch.ones_like(labels_id), torch.zeros_like(labels_ood)], dim=0).numpy()
-    
+
     preds_id = torch.max(id_logits, dim=-1)[1]
     acc = (preds_id == labels_id).float().mean().numpy()
 

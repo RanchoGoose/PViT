@@ -113,3 +113,4 @@ class Mahalanobis(object):
         delta = x - center
         ms = (np.matmul(delta, icov) * delta).sum(axis=1)
         return np.maximum(ms, 0)
+

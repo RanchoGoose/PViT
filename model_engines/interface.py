@@ -14,9 +14,9 @@ class ModelEngine(ABC):
         Set up the model architecture and configurations.
         """
         self._folds = ['train', 'id', 'ood']
-        
+
         self._data_root_path = args.data_root_path
-        
+
         self._train_data_name = args.train_data_name
         self._id_data_name = args.id_data_name
         self._ood_data_name = args.ood_data_name
@@ -50,4 +50,4 @@ def verify_model_outputs(model_outputs: Tuple) -> bool:
     return True
 
 
-    
+

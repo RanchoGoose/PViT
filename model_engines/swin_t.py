@@ -13,7 +13,7 @@ from dataloaders.factory import get_train_dataloader, get_id_dataloader, get_ood
 class SwinTModelEngine(ModelEngine):
     def set_model(self, args):
         super().set_model(args)
-        
+
         self._model = Swin_T()
         weights = eval(f'Swin_T_Weights.IMAGENET1K_V1')
         self._model.load_state_dict(load_state_dict_from_url(weights.url))
@@ -21,41 +21,41 @@ class SwinTModelEngine(ModelEngine):
 
         self._model.to(self._device)
         self._model.eval()
-    
+
     def set_dataloaders(self):
         self._dataloaders = {}
-        self._dataloaders['train'] = get_train_dataloader(self._data_root_path, 
+        self._dataloaders['train'] = get_train_dataloader(self._data_root_path,
                                                          self._train_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
 
-        self._dataloaders['id'] = get_id_dataloader(self._data_root_path, 
+        self._dataloaders['id'] = get_id_dataloader(self._data_root_path,
                                                          self._id_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
-        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path, 
+        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path,
                                                          self._ood_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
 
     def train_model(self):
         pass
-    
+
     def get_model_outputs(self):
         model_outputs = {}
         for fold in self._folds:
             model_outputs[fold] = {}
-            
+
             _dataloader = self._dataloaders[fold]
             _tensor_dict = extract_features(self._model, _dataloader, self._device)
-            
+
             model_outputs[fold]["feas"] = _tensor_dict["feas"]
             model_outputs[fold]["logits"] = _tensor_dict["logits"]
             model_outputs[fold]["labels"] = _tensor_dict["labels"]
-        
+
         return model_outputs['train'], model_outputs['id'], model_outputs['ood']
 
 class Swin_T(SwinTransformer):
@@ -83,7 +83,7 @@ class Swin_T(SwinTransformer):
         x = self.permute(x)
         x = self.avgpool(x)
         x = self.flatten(x)
-        
+
         return  x, self.head(x)
 
         # if return_feature:

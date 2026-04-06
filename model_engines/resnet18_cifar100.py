@@ -18,41 +18,41 @@ class ResNet18ModelEngine(ModelEngine):
         self._model.to(self._device)
         self._model.eval()
         self._data_transform = DATA_TRANSFORM
-        
+
     def set_dataloaders(self):
         self._dataloaders = {}
-        self._dataloaders['train'] = get_train_dataloader(self._data_root_path, 
+        self._dataloaders['train'] = get_train_dataloader(self._data_root_path,
                                                          self._train_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
 
-        self._dataloaders['id'] = get_id_dataloader(self._data_root_path, 
+        self._dataloaders['id'] = get_id_dataloader(self._data_root_path,
                                                          self._id_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
-        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path, 
+        self._dataloaders['ood'] = get_ood_dataloader(self._data_root_path,
                                                          self._ood_data_name,
-                                                         self._batch_size, 
+                                                         self._batch_size,
                                                          self._data_transform,
                                                          num_workers=self._num_workers)
 
     def train_model(self):
         pass
-    
+
     def get_model_outputs(self):
         model_outputs = {}
         for fold in self._folds:
             model_outputs[fold] = {}
-            
+
             _dataloader = self._dataloaders[fold]
             _tensor_dict = extract_features_resnet18(self._model, _dataloader, self._device)
-            
+
             model_outputs[fold]["feas"] = _tensor_dict["feas"]
             model_outputs[fold]["logits"] = _tensor_dict["logits"]
             model_outputs[fold]["labels"] = _tensor_dict["labels"]
-        
+
         return model_outputs['train'], model_outputs['id'], model_outputs['ood']
 
 
@@ -219,8 +219,8 @@ class ResNet18_32x32(nn.Module):
 
     def get_fc_layer(self):
         return self.fc
-    
-    
+
+
 import torchvision.transforms as transforms
 DATA_TRANSFORM = transforms.Compose([
             transforms.Resize((32, 32)),

@@ -129,7 +129,7 @@ class CIFARData(Dataset):
             _dataset = CIFAR100(root=f"{data_root_path}/images_classic/cifar100", train=train, download=True)
         else:
             raise ValueError("Invalid dataset name")
-        
+
         # Extracting samples and targets
         self.data = [transforms.ToPILImage()(image) for image in _dataset.data]
         self.targets = _dataset.targets
@@ -147,7 +147,7 @@ class CIFARData(Dataset):
         if self.transform:
             img = self.transform(img)
         return img, self.reject_targets[index], self.targets[index]
-    
+
 class SVHNData(Dataset):
     def __init__(self, data_root_path, transform, train=True):
 
@@ -157,7 +157,7 @@ class SVHNData(Dataset):
             split = 'test'
 
         _dataset = SVHN(root=data_root_path, split=split, download=True)
-        
+
         # Convert the numpy arrays to PIL Images
         self.data = [transforms.ToPILImage()(image) for image in _dataset.data.transpose((0, 2, 3, 1))]
         self.targets = _dataset.labels.tolist()
@@ -176,7 +176,7 @@ class SVHNData(Dataset):
             img = self.transform(img)
         return img, self.reject_targets[index], self.targets[index]
 
-def get_dataset(data_root_path, data_name, transform, 
+def get_dataset(data_root_path, data_name, transform,
                 train=True, ood=False):
     # datasets_info = {
     #     'Texture': '/mnt/parscratch/users/coq20tz/data/dtd/images',

@@ -83,7 +83,7 @@ class Transformer(nn.Module):
             x = ff(x) + x  # Call feedforward layer and apply residual connection
 
         return self.norm(x), attention_maps
-    
+
 # class Prior_Embedding(nn.Module):
 #     def __init__(self, num_patches, embedding_dim, num_classes, alpha_weight):
 #         super().__init__()
@@ -93,22 +93,22 @@ class Transformer(nn.Module):
 #         # Learnable weight parameter
 #         self.alpha = nn.Parameter(torch.tensor(1.0))
 #         self.alpha_weight = alpha_weight
-        
+
 #     def forward(self, patches, priors):
 #         # patches shape: (B, num_patches, embedding_dim)
 #         # priors shape: (B, embedding_dim)
-        
+
 #         # Transform each prior in the batch
 #         transformed_priors = self.transform(priors)
-        
+
 #         # Reshape the transformed priors to match the patches shape
 #         priors_embedding = transformed_priors.view(patches.shape[0], self.num_patches, -1)
 
 #         alpha_sigmoid = self.alpha_weight * torch.sigmoid(self.alpha)
-        
+
 #         return patches + alpha_sigmoid * priors_embedding
         # return patches + priors_embedding
-    
+
 class PViT(nn.Module):
     def __init__(self, *, args, image_size, patch_size, num_classes, dim, depth, heads, mlp_dim, pool = 'cls', channels = 3, dim_head = 64, dropout = 0., emb_dropout = 0.):
         super().__init__()
@@ -134,11 +134,11 @@ class PViT(nn.Module):
                 nn.LayerNorm(dim),
             )
 
-        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 2, dim))  
+        self.pos_embedding = nn.Parameter(torch.randn(1, num_patches + 2, dim))
         # self.alpha_weight = args.alpha_weight
         # self.prior_embedding = Prior_Embedding(num_patches, dim, num_classes, self.alpha_weight)
-        self.prior_projection = nn.Linear(num_classes, dim)  # Project prior to the embedding dimension   
-        # Learnable scale factor     
+        self.prior_projection = nn.Linear(num_classes, dim)  # Project prior to the embedding dimension
+        # Learnable scale factor
         self.scale_factor = nn.Parameter(torch.full((1,), args.alpha_weight))
         self.cls_token = nn.Parameter(torch.randn(1, 1, dim))
         self.dropout = nn.Dropout(emb_dropout)
@@ -147,7 +147,7 @@ class PViT(nn.Module):
         self.to_latent = nn.Identity()
         # self.mlp_head = nn.Linear(dim, num_classes) #
         self.mlp_head = nn.Linear(dim, num_classes)
-    
+
     def forward(self, img, prior):
         x = self.to_patch_embedding(img)
         b, n, _ = x.shape
@@ -172,6 +172,6 @@ class PViT(nn.Module):
 
         # Pooling and classifier head
         x = x.mean(dim=1) if self.pool == 'mean' else x[:, 0]
-        
+
         # Return logits and optionally attention maps
         return prior_fes, x, self.mlp_head(x)

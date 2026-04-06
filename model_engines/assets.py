@@ -9,7 +9,7 @@ def extract_features(model, dataloader, device):
     feas = [[]] * len(dataloader)
     logits = [[]] * len(dataloader)
     labels = [[]] * len(dataloader)
-    
+
     for i, labeled_data in tqdm(enumerate(dataloader), desc="Extracting features"):
         _x = labeled_data[0].to(device)
         _y = labeled_data[2]
@@ -21,7 +21,7 @@ def extract_features(model, dataloader, device):
         feas[i] = _feas.cpu()
         logits[i] = _logits.cpu()
         labels[i] = _y.cpu()
-    
+
     feas = torch.cat(feas, dim=0)
     logits = torch.cat(logits, dim=0)
     labels = torch.cat(labels, dim=0)
@@ -38,7 +38,7 @@ def extract_features_pvit(prior_model, model, dataloader, device):
     logits = [[]] * len(dataloader)
     labels = [[]] * len(dataloader)
     priors = [[]] * len(dataloader)
-    
+
     for i, labeled_data in tqdm(enumerate(dataloader), desc="Extracting features"):
         _x = labeled_data[0].to(device)
         _y = labeled_data[2]
@@ -52,7 +52,7 @@ def extract_features_pvit(prior_model, model, dataloader, device):
                 _priors = prior_model(_x)
             if hasattr(_priors, 'logits'):
                 _priors = _priors.logits
-                
+
             _rawfeas, _logits = model(_x, _priors)
         _feas = F.normalize(_rawfeas, dim=1)
 
@@ -60,7 +60,7 @@ def extract_features_pvit(prior_model, model, dataloader, device):
         logits[i] = _logits.cpu()
         labels[i] = _y.cpu()
         priors[i] = _priors.cpu()
-    
+
     feas = torch.cat(feas, dim=0)
     logits = torch.cat(logits, dim=0)
     labels = torch.cat(labels, dim=0)
@@ -78,7 +78,7 @@ def extract_features_pvit_ablation(prior_model, model, dataloader, device):
     logits = [[]] * len(dataloader)
     labels = [[]] * len(dataloader)
     priors = [[]] * len(dataloader)
-    
+
     for i, labeled_data in tqdm(enumerate(dataloader), desc="Extracting features"):
         _x = labeled_data[0].to(device)
         _y = labeled_data[2]
@@ -92,7 +92,7 @@ def extract_features_pvit_ablation(prior_model, model, dataloader, device):
                 _priors = prior_model(_x)
             if hasattr(_priors, 'logits'):
                 _priors = _priors.logits
-                
+
             _rawfeas, _logits = model(_x)
         _feas = F.normalize(_rawfeas, dim=1)
 
@@ -100,7 +100,7 @@ def extract_features_pvit_ablation(prior_model, model, dataloader, device):
         logits[i] = _logits.cpu()
         labels[i] = _y.cpu()
         priors[i] = _priors.cpu()
-    
+
     feas = torch.cat(feas, dim=0)
     logits = torch.cat(logits, dim=0)
     labels = torch.cat(labels, dim=0)
@@ -117,24 +117,24 @@ def extract_features_resnet18(model, dataloader, device):
     feas = []
     logits = []
     labels = []
-    
+
     for i, labeled_data in tqdm(enumerate(dataloader), desc="Extracting features"):
         _x = labeled_data[0].to(device)
         _y = labeled_data[2]
 
-        with torch.no_grad():        
+        with torch.no_grad():
             _logits, _rawfeas = model(_x, return_feature=True)
 
         _feas = F.normalize(_rawfeas, dim=1)
-        
+
         feas.append(_feas.cpu())
         logits.append(_logits.cpu())
         labels.append(_y.cpu())
-    
+
     feas = torch.cat(feas, dim=0)
     logits = torch.cat(logits, dim=0)
     labels = torch.cat(labels, dim=0)
-    
+
     print(f"Successfully extracted features")
 
     return {"feas": feas, "logits": logits, "labels": labels}
@@ -146,7 +146,7 @@ def extract_features_vit_pross(model, dataloader, device):
     feas = [[]] * len(dataloader)
     logits = [[]] * len(dataloader)
     labels = [[]] * len(dataloader)
-    
+
     for i, labeled_data in tqdm(enumerate(dataloader), desc="Extracting features"):
         _x = labeled_data[0].to(device)
         _y = labeled_data[2]
@@ -158,7 +158,7 @@ def extract_features_vit_pross(model, dataloader, device):
         feas[i] = _feas.cpu()
         logits[i] = _logits.cpu()
         labels[i] = _y.cpu()
-    
+
     feas = torch.cat(feas, dim=0)
     logits = torch.cat(logits, dim=0)
     labels = torch.cat(labels, dim=0)
@@ -220,12 +220,12 @@ def save_checkpoint(epoch, loss, filename=None):
     Args:
         epoch (int): Current epoch number.
         loss (float): Loss value at the current epoch.
-        filename (str, optional): File path to save the checkpoint. 
+        filename (str, optional): File path to save the checkpoint.
                                     Defaults to a timestamped filename.
     """
     if filename is None:
         filename = os.path.join(checkpoint_dir, f"checkpoint_epoch_{epoch+1}.pth")
-    
+
     checkpoint = {
         'epoch': epoch + 1,
         'model_state_dict': model.state_dict(),

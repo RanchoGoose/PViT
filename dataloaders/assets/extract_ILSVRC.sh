@@ -8,7 +8,7 @@
 #  Adapted from:
 #  https://github.com/facebook/fb.resnet.torch/blob/master/INSTALL.md
 #  https://gist.github.com/BIGBALLON/8a71d225eff18d88e469e6ea9b39cef4
-# 
+#
 #  imagenet/train/
 #  ├── n01440764
 #  │   ├── n01440764_10026.JPEG
@@ -36,7 +36,7 @@ tar -xvf ILSVRC2012_img_train.tar && rm -f ILSVRC2012_img_train.tar
 #
 # At this stage imagenet/train will contain 1000 compressed .tar files, one for each category
 #
-# For each .tar file: 
+# For each .tar file:
 #   1. create directory with same name as .tar file
 #   2. extract and copy contents of .tar file into directory
 #   3. remove .tar file

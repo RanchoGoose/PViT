@@ -12,7 +12,7 @@ def jensen_shannon_divergence(p, q):
     p = p + epsilon
     q = q + epsilon
     m = 0.5 * (p + q)
-    
+
     js_divergence = 0.5 * (F.kl_div(p.log(), m, reduction='batchmean') + F.kl_div(q.log(), m, reduction='batchmean'))
     return js_divergence
 
@@ -35,17 +35,17 @@ class PViTOODDetector(OODDetector):
 
         if args.score == 'knn':
             scores = knn_score(self.feas_train, feas, k=10, min=True)
-        
+
         elif args.score == 'nnguide':
             confs_train = torch.logsumexp(self.logits_train, dim=1)
-            scaled_feas_train = self.feas_train * confs_train[:, None]  
+            scaled_feas_train = self.feas_train * confs_train[:, None]
             confs = torch.logsumexp(logits, dim=1)
             guidances = knn_score(scaled_feas_train, feas, k=10)
-            scores = torch.from_numpy(guidances).to(confs.device)*confs  
-            
+            scores = torch.from_numpy(guidances).to(confs.device)*confs
+
         elif args.score == 'energy':
-            scores = torch.logsumexp(logits, dim=1)   
-                
+            scores = torch.logsumexp(logits, dim=1)
+
         else:
             # Iterate over each element in the list
             for i in range(len(logits)):
@@ -57,10 +57,10 @@ class PViTOODDetector(OODDetector):
                 # Ensure dimensions are correct
                 current_logits = current_logits.unsqueeze(0) if current_logits.dim() == 1 else current_logits
                 current_priors = current_priors.unsqueeze(0) if current_priors.dim() == 1 else current_priors
-                
-                _, pred = torch.max(current_logits, dim=-1)                
+
+                _, pred = torch.max(current_logits, dim=-1)
                 energy = torch.logsumexp(current_priors, dim=-1)
-                    
+
                 if args.score == 'double_energy':
                     prior_energy = torch.logsumexp(current_priors, dim=1)
                     true_energy = torch.logsumexp(current_logits, dim=1)
@@ -68,18 +68,18 @@ class PViTOODDetector(OODDetector):
 
                 elif args.score == 'cosine':
                     score = -F.cosine_similarity(current_priors, current_logits, dim=1)
-                    
-                    
+
+
                 elif args.score == 'cross_entropy':
                     if pred.shape[0] != current_logits.shape[0]:
                         pred = pred.expand(current_logits.shape[0])
-                        
+
                     priorsout = torch.softmax(current_priors, dim=1)
                     # energy = torch.logsumexp(current_priors, dim=-1)
                     score = F.cross_entropy(priorsout, pred, reduction='none')
                     # score = score * energy
-                    
-                # elif args.score == 'cross_entropy':              
+
+                # elif args.score == 'cross_entropy':
                 #     # Ensure `pred` matches the batch size
                 #     if pred.shape[0] != current_logits.shape[0]:
                 #         pred = pred.expand(current_logits.shape[0])
@@ -89,7 +89,7 @@ class PViTOODDetector(OODDetector):
                 #     # # Optional: Multiply scores by prior energy
                 #     # prior_energy = torch.logsumexp(current_priors, dim=-1)
                 #     # score = score * prior_energy
-                    
+
                 elif args.score == 'dis':
                     # energy = torch.logsumexp(current_priors, dim=-1)
                     score = torch.norm(current_priors - current_logits, dim=1)
@@ -104,13 +104,13 @@ class PViTOODDetector(OODDetector):
                 elif args.score == 'difference':
                     p = F.softmax(current_priors, dim=1)
                     score = -(p.argmax(dim=1) != current_logits.argmax(dim=1)).float()
-                    
+
                 elif args.score == 'JS':
                     current_priors = F.softmax(current_priors, dim=1)
                     current_logits = F.softmax(current_logits, dim=1)
                     score = -jensen_shannon_divergence(current_priors, current_logits)
                     # score = score * energy
-                    
+
                 # score = score * energy
                 # Append score to the list
                 scores.append(score.item())  # or just append(score) for tensor output

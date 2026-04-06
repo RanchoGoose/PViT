@@ -8,7 +8,7 @@ class KNNOODDetector(OODDetector):
 
     def setup(self, args, train_model_outputs):
         feas_train = train_model_outputs['feas']
-        
+
         try:
             self.knn_k = args.detector['knn_k']
         except:

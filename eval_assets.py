@@ -56,9 +56,9 @@ def save_performance(scores_set, labels, accs, log_path):
     df.to_csv(log_path)
     # for key in pfs.keys():
     #     dict2csv(pfs[key], f"{log_dir_path}/{key}_split-{split_idx}.csv")
-    
-    
-    
+
+
+
 def save_raw_scores(scores_set, labels, raw_scores_path):
     """
     Save raw scores along with labels to a CSV file for later analysis or plotting.
@@ -73,10 +73,10 @@ def save_raw_scores(scores_set, labels, raw_scores_path):
     """
     # Create a DataFrame from scores_set
     df_scores = pd.DataFrame.from_dict(scores_set, orient='index').transpose()
-    
+
     # Add labels to the DataFrame
     df_scores['labels'] = labels
-    
+
     # Save the raw scores DataFrame to a CSV file
     df_scores.to_csv(raw_scores_path, index=False)
     print("Raw scores with labels saved to:", raw_scores_path)
