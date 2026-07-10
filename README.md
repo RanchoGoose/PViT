@@ -73,9 +73,25 @@ python main.py --model_name pvit --id_data_name imagenet1k --ood_data_name inatu
 ### OOD Scoring Functions
 | Argument | Method |
 |----------|--------|
-| `cross_entropy` | Cross-Entropy (CE) |
-| `KL` | KL Divergence |
-| `dis` | Euclidean Distance (ED) |
+| `cross_entropy` | PGE with Cross-Entropy (CE) guidance |
+| `KL` | PGE with KL-Divergence guidance |
+| `dis` | PGE with Euclidean-Distance (ED) guidance |
+| `guidance_only` | CE guidance term alone (ablation) |
+| `additive` | Additive combination `S_base - G` (ablation) |
+
+### Score Orientation Convention
+
+All detectors return **confidence scores**: the higher the score, the more
+ID-like the input. The evaluation harness (`main.py` +
+`eval_assets.compute_ood_performances`) labels ID samples as the positive
+class and consumes scores unmodified.
+
+The paper's PGE score `S_PGE = S_base * G` (Eq. 12) is an *OOD-ness* score:
+the guidance term `G` is a divergence between the prior distribution and
+PViT's prediction, so `S_PGE` is small for ID and large for OOD. The
+detector therefore returns `-S_PGE`, which is equivalent to the paper's
+decision rule "**x is ID iff `S_PGE < γ`**" (Eq. 13). This is the
+orientation under which all results in the paper were computed.
 
 ## Reproduce Paper Results
 

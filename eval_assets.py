@@ -4,8 +4,11 @@ from sklearn import metrics
 from misc.utils_python import dict2csv
 
 def compute_ood_performances(labels, scores):
-    # labels: 0 = OOD, 1 = ID
-    # scores: it is anomality score (the higher the score, the more anomalous)
+    # labels: 0 = OOD, 1 = ID (ID is the positive class)
+    # scores: confidence scores (the higher the score, the more ID-like).
+    # Scores are consumed unmodified: detectors must return confidence-
+    # oriented scores. For the PGE score of the paper (an OOD-ness score),
+    # the detector returns -S_PGE (see ood_detectors/pvit.py).
 
     # auroc
     fpr, tpr, _ = metrics.roc_curve(labels, scores, drop_intermediate=False)
